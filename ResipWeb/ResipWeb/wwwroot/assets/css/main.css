@@ -2096,15 +2096,9 @@ div.pagination span.disabled {
   padding-left: 15px;
   padding-right: 15px;
 }
-/* ép mỗi ô sản phẩm có chiều cao cố định */
-.owl-carousel .owl-item {
-  min-height: 350px; /* bạn chỉnh lại theo thiết kế */
-}
 
-/* ép luôn phần nội dung text bên dưới */
-.owl-carousel .owl-item .text {
-  min-height: 110px; /* fix phần tên + giá cho cao đều */
-}
+
+
 
 /* căn giữa tên khi nó ngắn */
 .owl-carousel .owl-item .text h3 {
@@ -2156,7 +2150,7 @@ div.pagination span.disabled {
 
     width: 90%; /* Để hở một chút lề với viền xanh cho đẹp */
     height: 90%;
-    background-size: contain;
+    background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
 }
@@ -2214,4 +2208,56 @@ div.pagination span.disabled {
 
 .product {
     margin-bottom: 70px;
+}
+.btn-add-cart {
+    display: inline-block;
+    background: #006837;
+    color: #fff;
+    border: none;
+    border-radius: 25px;
+    padding: 10px 22px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+    .btn-add-cart:hover {
+        background: #004d29;
+    }
+
+.featured-carousel .btn-add-cart {
+    display: inline-block;
+    padding: 10px 22px;
+    background: #006837;
+    color: #fff;
+    border: none;
+    border-radius: 25px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+    .featured-carousel .btn-add-cart:hover {
+        background: #004d29;
+    }
+
+/* TEST CƯỠNG BỨC – ĐỂ NHÌN THẤY TEXT */
+.featured-carousel .text {
+    background: red !important;
+    color: white !important;
+    min-height: 200px !important;
+    display: block !important;
+}
+/* FIX CHIỀU CAO CARD SẢN PHẨM */
+.featured-carousel .owl-item {
+    height: auto !important;
+}
+
+.featured-carousel .item {
+    height: auto !important;
+    display: block;
+}
+
+.featured-carousel .thumb {
+    margin-bottom: 15px;
 }
