@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "Đặt hàng thành công";
 }
 
@@ -148,8 +148,11 @@
             <a href="/" class="btn-action btn-primary-custom">
                 Tiếp tục mua sắm
             </a>
-            <a href="/DonHang/History" class="btn-action btn-secondary-custom">
-                Xem đơn hàng của tôi
+            <a asp-controller="LichSuDonHang"
+               asp-action="Index"
+               class="btn-action btn-secondary-custom"
+               style="text-decoration: none; display: inline-flex; align-items: center;">
+                <i class="fa fa-history" style="margin-right: 8px;"></i> Xem đơn hàng của tôi
             </a>
         </div>
     </div>
