@@ -1,4 +1,4 @@
-﻿@model List<DonHang>
+@model List<DonHang>
 @{
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
@@ -540,25 +540,55 @@
                                 <td>@((d.TongTien ?? 0).ToString("N0"))</td>
                                 <td>
                                     <div class="action-buttons">
+
+                                        <!-- Xem chi tiết -->
                                         <a asp-area="Admin"
-                                                                 asp-controller="DonHang"
-                                                                 asp-action="ChiTiet"
-                                                                 asp-route-id="@d.Id"
-                                                                 class="btn-icon"
-                                                                 title="Xem chi tiết">
+                                           asp-controller="DonHangs"
+                                           asp-action="Details"
+                                           asp-route-id="@d.Id"
+                                           class="btn-icon"
+                                           title="Xem chi tiết">
                                             👁️
                                         </a>
-                                        <button class="btn-icon" title="Chỉnh sửa">
+
+                                        <!-- Chỉnh sửa -->
+                                        <a asp-area="Admin"
+                                           asp-controller="DonHangs"
+                                           asp-action="Edit"
+                                           asp-route-id="@d.Id"
+                                           class="btn-icon"
+                                           title="Chỉnh sửa">
                                             ✏️
-                                        </button>
-                                        <button class="btn-icon" title="In đơn">
+                                        </a>
+
+                                        <!-- In đơn -->
+                                        <a asp-area="Admin"
+                                           asp-controller="DonHangs"
+                                           asp-action="Print"
+                                           asp-route-id="@d.Id"
+                                           class="btn-icon"
+                                           title="In đơn">
                                             🖨️
-                                        </button>
-                                        <button class="btn-icon danger" title="Xóa">
-                                            🗑️
-                                        </button>
+                                        </a>
+
+                                        <!-- Xóa -->
+                                        <form asp-area="Admin"
+                                              asp-controller="DonHangs"
+                                              asp-action="Delete"
+                                              asp-route-id="@d.Id"
+                                              method="post"
+                                              style="display:inline;">
+                                            <button type="submit"
+                                                    class="btn-icon danger"
+                                                    title="Xóa"
+                                                    onclick="return confirm('Bạn có chắc chắn muốn xóa đơn hàng này?');">
+                                                🗑️
+                                            </button>
+                                        </form>
+
                                     </div>
                                 </td>
+
                             </tr>
                         }
                     </tbody>
