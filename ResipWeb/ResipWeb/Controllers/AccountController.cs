@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -55,15 +55,18 @@ namespace ResipWeb.Controllers
                     return View(model);
                 }
 
-                var newUser = new ResipWeb.Models.User
+                var newUser = new User
                 {
                     FullName = model.FullName,
                     Email = model.Email,
                     Username = model.Username,
                     PhoneNumber = model.PhoneNumber,
                     ShippingAddress = model.ShippingAddress,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.Now,
+                    IsActive = true,
+                    Role = "User"
                 };
+
 
                 newUser.PasswordHash = _passwordHasher.HashPassword(newUser, model.Password);
 
@@ -88,10 +91,13 @@ namespace ResipWeb.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Lỗi khi đăng ký thành viên");
-                ModelState.AddModelError(string.Empty, "Đã xảy ra lỗi hệ thống.");
+                ModelState.AddModelError(
+                    "",
+                    ex.InnerException?.Message ?? ex.Message
+                );
                 return View(model);
             }
+
         }
 
         // ==========================================
