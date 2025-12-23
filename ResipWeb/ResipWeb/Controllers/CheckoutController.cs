@@ -1,14 +1,13 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ResipWeb.Models;
-using ResipWeb.Models.ViewModels; // Namespace chứa CheckoutViewModel
-using System.ComponentModel.DataAnnotations.Schema;
+using ResipWeb.Models.ViewModels;
 using System.Security.Claims;
 
 namespace ResipWeb.Controllers
 {
-    [Authorize] // Bắt buộc đăng nhập
+    [Authorize] // Bắt buộc đăng nhập để thanh toán
     public class CheckoutController : Controller
     {
         private readonly AppDbContext _context;
@@ -19,6 +18,7 @@ namespace ResipWeb.Controllers
         }
 
         // GET: /Checkout
+        // Hiển thị trang thanh toán với danh sách sản phẩm từ giỏ hàng
         public async Task<IActionResult> Index()
         {
             var cartItems = await GetCartItems();
@@ -28,114 +28,131 @@ namespace ResipWeb.Controllers
                 return RedirectToAction("Index", "Cart");
             }
 
-            // --- KHỚP CODE VỚI MODEL SANPHAM ---
-            // Gia -> GiaBan
-            // HinhAnh -> AnhChinh
             var model = new CheckoutViewModel
             {
                 CartItems = cartItems.Select(x => new CartItemViewModel
                 {
                     TenSanPham = x.SanPham.TenSanPham,
-                    DonGia = x.SanPham.GiaBan,  // Sửa: Lấy từ GiaBan
+                    DonGia = x.SanPham.GiaBan,
                     SoLuong = x.SoLuong,
-                    HinhAnh = x.SanPham.AnhChinh // Sửa: Lấy từ AnhChinh
+                    HinhAnh = x.SanPham.AnhChinh
                 }).ToList(),
-                TongTienHang = cartItems.Sum(x => x.SanPham.GiaBan * x.SoLuong), // Sửa: GiaBan
+                TongTienHang = cartItems.Sum(x => x.SanPham.GiaBan * x.SoLuong),
                 PhiVanChuyen = 30000
             };
 
             return View(model);
         }
-        public string? MauSac { get; set; }
-        public string? KichThuoc { get; set; }
 
-        [Column(TypeName = "decimal(18,2)")]
-        public decimal? ThanhTien { get; set; }
-
-        public DonHang? DonHang { get; set; }
-        public SanPham? SanPham { get; set; }
         // POST: /Checkout/PlaceOrder
+        // Xử lý đặt hàng, trừ tồn kho và xóa giỏ hàng
         [HttpPost]
         public async Task<IActionResult> PlaceOrder(CheckoutViewModel model)
         {
+            var cartItems = await GetCartItems();
+
             if (ModelState.IsValid)
             {
-                var userId = GetUserId();
-                var cartItems = await GetCartItems();
-
                 if (cartItems.Count == 0) return RedirectToAction("Index", "Cart");
 
-                // --- KHỚP CODE VỚI MODEL DONHANG ---
+                var userId = GetUserId();
+
+                // 1. Khởi tạo đơn hàng mới
                 var donHang = new DonHang
                 {
                     UserId = userId.ToString(),
-                    // Tạo mã đơn hàng tự động (VD: DH638384...)
-                    MaDonHang = "DH" + DateTime.Now.Ticks.ToString(),
-
-                    HoTen = model.HoTen, // Khớp với DonHang.cs
-
-                    DienThoai = model.SoDienThoai, // Khớp: DonHang dùng 'DienThoai'
-
+                    MaDonHang = "DH" + DateTime.Now.Ticks.ToString(), // Mã duy nhất dựa trên thời gian
+                    HoTen = model.HoTen,
+                    DienThoai = model.SoDienThoai,
                     DiaChi = $"{model.DiaChiCuThe}, {model.PhuongXa}, {model.TinhThanh}",
-                    NgayTao = DateTime.Now, // Khớp: DonHang dùng 'NgayTao' (không phải NgayDat)
-
-                    TrangThai = "ChoXuLy", // Khớp: DonHang dùng 'TrangThai'
-
-                    TongTien = model.TongThanhToan
-
-                    // LƯU Ý: Đã bỏ 'GhiChu' và 'PhuongThucThanhToan' vì Model DonHang của bạn chưa có.
+                    NgayTao = DateTime.Now,
+                    TrangThai = "ChoXuLy",
                 };
+                decimal tongTien = 0;
+                var gioHang = _context.GioHangs
+    .Include(g => g.SanPham)
+    .Where(g => g.UserId == userId)
+    .ToList();
+
+                if (!gioHang.Any())
+                {
+                    ModelState.AddModelError("", "Giỏ hàng trống");
+                    return View("Index", model);
+                }
+
+                foreach (var item in gioHang)
+                {
+                    tongTien += item.SoLuong * item.SanPham.GiaBan;
+                }
+
+                donHang.TongTien = tongTien;
 
                 _context.DonHangs.Add(donHang);
+                // Lưu để lấy được donHang.Id cho bước sau
                 await _context.SaveChangesAsync();
 
-                // --- LƯU CHI TIẾT ĐƠN HÀNG ---
+                // 2. Lưu chi tiết đơn hàng VÀ CẬP NHẬT TỒN KHO SẢN PHẨM
                 var chiTietList = new List<ChiTietDonHang>();
                 foreach (var item in cartItems)
                 {
+                    // --- LOGIC CẬP NHẬT TỒN KHO ---
+                    var product = await _context.SanPhams.FindAsync(item.SanPhamId);
+                    if (product != null)
+                    {
+                        // Trừ số lượng tồn kho dựa trên số lượng khách mua
+                        product.StockQuantity -= item.SoLuong;
+                        _context.SanPhams.Update(product);
+                    }
+
+                    // Thêm vào danh sách chi tiết đơn hàng
                     chiTietList.Add(new ChiTietDonHang
                     {
                         DonHangId = donHang.Id,
                         SanPhamId = item.SanPhamId,
                         SoLuong = item.SoLuong,
-                        DonGia = item.SanPham.GiaBan, // Lưu giá bán tại thời điểm mua
+                        DonGia = item.SanPham.GiaBan,
                         TenSanPham = item.SanPham.TenSanPham,
-
                     });
                 }
                 _context.ChiTietDonHangs.AddRange(chiTietList);
 
-                // Xóa giỏ hàng
+                // 3. Xóa các sản phẩm trong giỏ hàng của người dùng này
                 _context.GioHangs.RemoveRange(cartItems);
+
+                // 4. Lưu tất cả thay đổi cuối cùng vào Database
                 await _context.SaveChangesAsync();
 
                 return RedirectToAction("OrderSuccess");
             }
 
-            // Nếu lỗi form, load lại dữ liệu để không bị lỗi View
-            var cart = await GetCartItems();
-            model.CartItems = cart.Select(x => new CartItemViewModel
+            // Nếu dữ liệu (ModelState) không hợp lệ, tải lại dữ liệu giỏ hàng và hiển thị lỗi
+            model.CartItems = cartItems.Select(x => new CartItemViewModel
             {
                 TenSanPham = x.SanPham.TenSanPham,
-                DonGia = x.SanPham.GiaBan, // Sửa: GiaBan
+                DonGia = x.SanPham.GiaBan,
                 SoLuong = x.SoLuong,
-                HinhAnh = x.SanPham.AnhChinh // Sửa: AnhChinh
+                HinhAnh = x.SanPham.AnhChinh
             }).ToList();
-            model.TongTienHang = cart.Sum(x => x.SanPham.GiaBan * x.SoLuong); // Sửa: GiaBan
+            model.TongTienHang = cartItems.Sum(x => x.SanPham.GiaBan * x.SoLuong);
+            model.PhiVanChuyen = 30000;
 
             return View("Index", model);
         }
 
+        // Trang thông báo đặt hàng thành công
         public IActionResult OrderSuccess()
         {
             return View();
         }
 
+        // Lấy ID người dùng đang đăng nhập
         private int GetUserId()
         {
-            return int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return userIdClaim != null ? int.Parse(userIdClaim) : 0;
         }
 
+        // Lấy danh sách sản phẩm trong giỏ hàng kèm thông tin Sản phẩm
         private async Task<List<GioHang>> GetCartItems()
         {
             var userId = GetUserId();
