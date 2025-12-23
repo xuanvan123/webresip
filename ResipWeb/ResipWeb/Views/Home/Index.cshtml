@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ResipWeb.Models.HomeService>
+@model IEnumerable<ResipWeb.Models.HomeService>
 
 @{
     ViewData["Title"] = "Trang chủ";
@@ -58,12 +58,14 @@
     }
 
     .featured-container {
-        overflow: hidden; /* KHÓA TOÀN BỘ TRÀN NGANG */
+        overflow: visible;
     }
 
         .featured-container .owl-stage-outer {
             overflow: hidden;
         }
+
+     
 
     /* responsive */
     @@media (max-width: 768px) {
@@ -183,17 +185,21 @@
 
     /* Product Cards */
     .product-carousel .item {
-        margin: 0 10px;
+        display: flex;
+        flex-direction: column;
+        height: auto;
     }
 
     .product-carousel .thumb {
-        border: 2px solid var(--primary-color);
-        border-radius: 12px;
-        padding: 10px;
-        overflow: hidden;
-        position: relative;
-        transition: all 0.3s;
+        flex: 0 0 auto;
     }
+
+    .product-carousel .text {
+        flex: 1 1 auto;
+        padding-bottom: 20px;
+    }
+
+
 
         .product-carousel .thumb:hover {
             transform: translateY(-5px);
@@ -211,12 +217,13 @@
 
     /* Fix lỗi khung sản phẩm bị container bóp nhỏ */
     .product-carousel .item {
-        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
     }
 
-    .product-carousel .text {
-        padding: 20px 10px;
-    }
+
+    
 
         .product-carousel .text h3 {
             font-size: 16px;
@@ -797,8 +804,8 @@
 </div>
 
 <!-- SẢN PHẨM NỔI BẬT -->
-<div class="featured-container"> </div>
-
+<!-- SẢN PHẨM NỔI BẬT -->
+<div class="featured-container">
     <div class="headline">
         <h2>Sản Phẩm Nổi Bật</h2>
         <h3>BST sản phẩm nổi bật nhất</h3>
@@ -806,47 +813,31 @@
 
     <div class="container">
         <div class="product-carousel owl-carousel featured-carousel">
+            
             @foreach (var item in (List<ResipWeb.Models.SanPham>)ViewBag.FeaturedProducts)
             {
                 <div class="item">
                     <div class="thumb">
                         <div class="photo"
-                             style="background-image:url('@Url.Content(item.AnhChinh)');">
+                             style="background-image:url('@item.AnhChinh')">
                         </div>
                     </div>
 
                     <div class="text">
-                        <h3>
-                            <a asp-controller="SanPham"
-                               asp-action="ChiTiet"
-                               asp-route-id="@item.Id">
-                                @item.TenSanPham
-                            </a>
-                        </h3>
+                        <h3>@item.TenSanPham</h3>
+                        <h4>@String.Format("{0:N0} đ", item.GiaBan)</h4>
 
-                        <div class="rating">
-                            @* Fix màu sao vàng *@
-                            <i class="fa fa-star text-warning"></i>
-                            <i class="fa fa-star text-warning"></i>
-                            <i class="fa fa-star text-warning"></i>
-                            <i class="fa fa-star text-warning"></i>
-                            <i class="fa fa-star text-warning"></i>
-                        </div>
-
-                        <h4>@String.Format("{0:N0}₫", item.GiaBan)</h4>
-
-                        <div class="btn-action">
-                            <button type="button"
-                                    onclick="themVaoGioHang('@item.Id')"
-                                    class="btn btn-add-cart">
-                                THÊM VÀO GIỎ HÀNG
-                            </button>
-                        </div>
+                        <button class="btn btn-add-cart"
+                                onclick="themVaoGioHang(@item.Id)">
+                            THÊM VÀO GIỎ HÀNG
+                        </button>
                     </div>
                 </div>
             }
+
         </div>
     </div>
+</div>
 
 
 
@@ -931,65 +922,42 @@
     </div>
 
     <!-- SẢN PHẨM MỚI NHẤT -->
+<!-- SẢN PHẨM NỔI BẬT -->
+<div class="featured-container">
+    <div class="headline">
+        <h2>Sản Phẩm Mới Nhất</h2>
+      
+    </div>
 
-
-    <section class="product product-new">
-        <div class="container">
-            <div class="headline">
-                <h2>SẢN PHẨM MỚI NHẤT</h2>
-                <h3>Các sản phẩm vừa được cập nhật</h3>
-            </div>
-
-            <div class="product-carousel owl-carousel featured-carousel">
-                @if (ViewBag.SanPhamMoiNhat != null)
-                {
-                    @foreach (var item in (List<ResipWeb.Models.SanPham>)ViewBag.SanPhamMoiNhat)
-                    {
-                        <div class="item">
-                            <div class="thumb">
-                                <div class="photo"
-                                     style="background-image:url('@Url.Content(item.AnhChinh)');">
-                                </div>
-                            </div>
-
-                            <div class="text">
-                                <h3>
-                                    <a asp-controller="SanPham"
-                                       asp-action="ChiTiet"
-                                       asp-route-id="@item.Id">
-                                        @item.TenSanPham
-                                    </a>
-                                </h3>
-
-                                <div class="rating">
-                                    <i class="fa fa-star text-warning"></i>
-                                    <i class="fa fa-star text-warning"></i>
-                                    <i class="fa fa-star text-warning"></i>
-                                    <i class="fa fa-star text-warning"></i>
-                                    <i class="fa fa-star text-warning"></i>
-                                </div>
-
-                                <h4>@String.Format("{0:N0}₫", item.GiaBan)</h4>
-
-                                <div class="btn-action">
-                                    <button type="button"
-                                            onclick="themVaoGioHang('@item.Id')"
-                                            class="btn btn-add-cart">
-                                        THÊM VÀO GIỎ HÀNG
-                                    </button>
-                                </div>
-                            </div>
+    <div class="container">
+        <div class="product-carousel owl-carousel featured-carousel">
+            @foreach (var item in (List<ResipWeb.Models.SanPham>)ViewBag.FeaturedProducts)
+            {
+                <div class="item">
+                    <div class="thumb">
+                        <div class="photo"
+                             style="background-image:url('@item.AnhChinh')">
                         </div>
-                    }
-                }
-                else
-                {
-                    <p>Đang cập nhật sản phẩm...</p>
-                }
-            </div>
-        </div>
+                    </div>
 
-    </section>
+                    <!-- PHẦN BẠN ĐANG THIẾU -->
+                    <div class="text">
+                        <h3>@item.TenSanPham</h3>
+                        <h4>@String.Format("{0:N0} đ", item.GiaBan)</h4>
+
+                        <button class="btn btn-add-cart"
+                                onclick="themVaoGioHang(@item.Id)">
+                            THÊM VÀO GIỎ HÀNG
+                        </button>
+                    </div>
+                </div>
+            
+
+            }
+        </div>
+    </div>
+</div>
+
 
 
 @{
@@ -1281,50 +1249,53 @@
 
     <!-- BRANDS SECTION -->
 @section Scripts {
-        <script>
-            $(document).ready(function() {
-                // Khởi tạo cho Sản phẩm (Nổi bật & Mới nhất)
-                $(".product-carousel").owlCarousel({
-                    loop: true,
-                    margin: 20,
-                    nav: true,
-                    dots: false,
-                    autoplay: true,
-                    responsive: {
-                        0: { items: 1 },
-                        600: { items: 2 },
-                        1000: { items: 4 }
-                    }
-                });
+    <script>
+        $(document).ready(function () {
 
-                // Khởi tạo cho Khách hàng nói gì ( testimonials-carousel)
-                $(".testimonials-carousel").owlCarousel({
-                    loop: true,
-                    margin: 30,
-                    nav: false,
-                    dots: true,
-                    autoplay: true,
-                    responsive: {
-                        0: { items: 1 },
-                        768: { items: 2 },
-                        992: { items: 3 }
-                    }
-                });
+            // Khởi tạo cho Sản phẩm (Nổi bật & Mới nhất)
+            $(".product-carousel").owlCarousel({
+                loop: true,
+                margin: 20,
+                nav: true,
+                dots: false,
+                autoplay: true,
+                autoHeight: true, // <<< CHỈ THÊM DÒNG NÀY
+                responsive: {
+                    0: { items: 1 },
+                    600: { items: 2 },
+                    1000: { items: 4 }
+                }
             });
 
-            // Hàm thêm vào giỏ hàng
-            function themVaoGioHang(id) {
-                $.ajax({
-                    url: '/Cart/AddToCart',
-                    type: 'POST',
-                    data: { SanPhamId: id, SoLuong: 1 },
-                    success: function (response) {
-                        window.location.href = '/Cart/Index';
-                    },
-                    error: function (xhr) {
-                        alert("Có lỗi xảy ra!");
-                    }
-                });
-            }
-        </script>
+            // Khởi tạo cho Khách hàng nói gì
+            $(".testimonials-carousel").owlCarousel({
+                loop: true,
+                margin: 30,
+                nav: false,
+                dots: true,
+                autoplay: true,
+                responsive: {
+                    0: { items: 1 },
+                    768: { items: 2 },
+                    992: { items: 3 }
+                }
+            });
+
+        });
+
+        // Hàm thêm vào giỏ hàng
+        function themVaoGioHang(id) {
+            $.ajax({
+                url: '/Cart/AddToCart',
+                type: 'POST',
+                data: { SanPhamId: id, SoLuong: 1 },
+                success: function () {
+                    window.location.href = '/Cart/Index';
+                },
+                error: function () {
+                    alert("Có lỗi xảy ra!");
+                }
+            });
+        }
+    </script>
 }
