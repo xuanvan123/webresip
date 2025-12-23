@@ -484,7 +484,11 @@
     <div class="table-container">
         <div class="table-header">
             <h4>Danh sách đơn hàng (@Model.Count())</h4>
+
             <div class="table-actions">
+                <a asp-area="Admin" asp-controller="DonHangs" asp-action="Create" class="btn btn-primary">
+                    ➕ Tạo đơn hàng mới
+                </a>
                 <button class="btn btn-success">
                     📥 Xuất Excel
                 </button>
