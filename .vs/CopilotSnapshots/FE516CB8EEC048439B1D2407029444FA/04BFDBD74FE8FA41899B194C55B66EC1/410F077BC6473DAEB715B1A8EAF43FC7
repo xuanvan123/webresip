@@ -1,0 +1,34 @@
+﻿using System.Net.Mail;
+using System.Net;
+
+namespace ResipWeb.Services
+{
+    // Very small SMTP sender using SmtpClient (synchronous Send). Configure in appsettings for production.
+    public class SmtpEmailSender
+    {
+        private readonly IConfiguration _config;
+        public SmtpEmailSender(IConfiguration config)
+        {
+            _config = config;
+        }
+
+        public async Task SendEmailAsync(string to, string subject, string htmlBody)
+        {
+            var smtp = _config.GetSection("Smtp");
+            var host = smtp.GetValue<string>("Host");
+            var port = smtp.GetValue<int>("Port");
+            var user = smtp.GetValue<string>("User");
+            var pass = smtp.GetValue<string>("Pass");
+            var from = smtp.GetValue<string>("From") ?? user;
+
+            using var client = new SmtpClient(host, port)
+            {
+                Credentials = new NetworkCredential(user, pass),
+                EnableSsl = smtp.GetValue<bool>("EnableSsl", true)
+            };
+
+            var msg = new MailMessage(from, to, subject, htmlBody) { IsBodyHtml = true };
+            await client.SendMailAsync(msg);
+        }
+    }
+}

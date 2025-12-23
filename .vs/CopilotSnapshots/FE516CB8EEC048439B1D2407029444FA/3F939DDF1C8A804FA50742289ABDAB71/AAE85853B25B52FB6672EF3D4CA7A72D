@@ -1,0 +1,16 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace ResipWeb.Models
+{
+    public class ChangePasswordViewModel
+    {
+        [DataType(DataType.Password)]
+        public string? CurrentPassword { get; set; }
+        [Required(ErrorMessage = "Please enter new password")]
+        [DataType(DataType.Password)]
+        public string NewPassword { get; set; } = string.Empty;
+        [DataType(DataType.Password)]
+        [Compare("NewPassword", ErrorMessage = "Confirm password does not match")]
+        public string ConfirmPassword { get; set; } = string.Empty;
+}        public string ConfirmPassword { get; set; } = string.Empty;
+}

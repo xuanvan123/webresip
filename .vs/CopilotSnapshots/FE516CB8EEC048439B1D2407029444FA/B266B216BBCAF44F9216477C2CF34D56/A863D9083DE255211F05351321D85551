@@ -1,0 +1,145 @@
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using ResipWeb.Areas.Admin.Models;
+using System.Security.Claims;
+using ResipWeb.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+
+namespace ResipWeb.Areas.Admin.Controllers
+{
+    [Area("Admin")]
+    public class AccountController : Controller
+    {
+        private readonly AppDbContext _db;
+        private readonly IPasswordHasher<User> _passwordHasher;
+
+        public AccountController(AppDbContext db, IPasswordHasher<User> passwordHasher)
+        {
+            _db = db;
+            _passwordHasher = passwordHasher;
+        }
+
+        // =======================
+        // GET: /Admin/Account/Login
+        // =======================
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult Login(string? returnUrl = null)
+        {
+            // Nếu đã login rồi thì không cho vào login nữa
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Index", "Admin", new { area = "Admin" });
+            }
+
+            ViewBag.ReturnUrl = returnUrl;
+            return View();
+        }
+
+        // =======================
+        // POST: /Admin/Account/Login
+        // =======================
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            // First try database authentication
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Username == model.Username && u.IsActive);
+            if (user != null)
+            {
+                var verify = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, model.Password);
+                if (verify != PasswordVerificationResult.Failed)
+                {
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.Name, user.Username),
+                        new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+                        new Claim("UserId", user.Id.ToString())
+                    };
+
+                    // grant Admin role if username is admin (or extend with a real role flag)
+                    if (string.Equals(user.Username, "admin", StringComparison.OrdinalIgnoreCase))
+                    {
+                        claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+                    }
+
+                    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var principal = new ClaimsPrincipal(identity);
+
+                    await HttpContext.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        principal,
+                        new AuthenticationProperties { IsPersistent = model.RememberMe }
+                    );
+
+                    if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                    {
+                        return Redirect(returnUrl);
+                    }
+
+                    return RedirectToAction("Index", "Admin", new { area = "Admin" });
+                }
+            }
+
+            // fallback: demo hard-coded admin (legacy)
+            if (model.Username == "admin" && model.Password == "123456")
+            {
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, model.Username),
+                    new Claim(ClaimTypes.Role, "Admin")
+                };
+
+                var identity = new ClaimsIdentity(
+                    claims,
+                    CookieAuthenticationDefaults.AuthenticationScheme
+                );
+
+                var principal = new ClaimsPrincipal(identity);
+
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    principal,
+                    new AuthenticationProperties
+                {
+                    IsPersistent = model.RememberMe
+                }
+                );
+
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
+
+                return RedirectToAction("Index", "Admin", new { area = "Admin" });
+            }
+
+            ModelState.AddModelError(string.Empty, "Tên đăng nhập hoặc mật khẩu không đúng");
+            return View(model);
+        }
+
+        // =======================
+        // POST: /Admin/Account/Logout
+        // =======================
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme
+            );
+
+            return RedirectToAction("Login", "Account", new { area = "Admin" });
+        }
+    }
+}

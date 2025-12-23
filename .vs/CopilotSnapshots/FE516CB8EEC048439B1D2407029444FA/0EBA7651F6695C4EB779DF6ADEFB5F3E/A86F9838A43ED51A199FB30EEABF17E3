@@ -1,0 +1,50 @@
+﻿@model ResipWeb.Models.UserProfileViewModel
+@{
+    ViewData["Title"] = "Hồ sơ cá nhân";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0" style="border-radius: 15px; overflow: hidden;">
+                <div class="card-header text-white text-center py-3" style="background-color: #026625;">
+                    <h4 class="mb-0 fw-bold">THÔNG TIN CÁ NHÂN</h4>
+                </div>
+                <div class="card-body p-4">
+                    @if (ViewBag.SuccessMessage != null)
+                    {
+                        <div class="alert alert-success text-center">@ViewBag.SuccessMessage</div>
+                    }
+                    <form asp-action="Profile" method="post">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="fw-bold small">Tên đăng nhập</label>
+                                <input asp-for="Username" class="form-control bg-light" readonly />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="fw-bold small">Email</label>
+                                <input asp-for="Email" class="form-control bg-light" readonly />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="fw-bold small">Họ tên</label>
+                            <input asp-for="FullName" class="form-control" />
+                            <span asp-validation-for="FullName" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="fw-bold small">Số điện thoại</label>
+                            <input asp-for="PhoneNumber" class="form-control" />
+                        </div>
+                        <div class="mb-4">
+                            <label class="fw-bold small">Địa chỉ</label>
+                            <textarea asp-for="ShippingAddress" class="form-control" rows="2"></textarea>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn text-white px-5" style="background-color: #026625;">Lưu Thay Đổi</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

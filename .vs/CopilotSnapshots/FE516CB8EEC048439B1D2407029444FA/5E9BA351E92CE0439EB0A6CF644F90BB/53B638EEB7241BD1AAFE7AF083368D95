@@ -1,0 +1,218 @@
+﻿@{
+    ViewData["Title"] = "Trang tài khoản";
+}
+
+<style>
+    /* CSS Riêng cho trang Dashboard */
+    .dashboard-container {
+        padding: 50px 0;
+        background-color: #f9f9f9;
+        min-height: 80vh;
+    }
+
+    /* Sidebar bên trái */
+    .account-sidebar {
+        background: #fff;
+        border: 1px solid #e1e1e1;
+        border-radius: 8px; /* Bo góc mềm mại hơn chút */
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .user-profile-header {
+        padding: 30px 20px;
+        text-align: center;
+        border-bottom: 1px solid #eee;
+        background-color: #fff;
+    }
+
+    .user-avatar {
+        width: 70px;
+        height: 70px;
+        background-color: #026625; /* Màu xanh Resip */
+        color: #fff;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 10px rgba(2, 102, 37, 0.2);
+    }
+
+    .account-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+        .account-menu li a {
+            display: block;
+            padding: 15px 25px;
+            color: #555;
+            border-bottom: 1px solid #f8f8f8;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+
+            .account-menu li a:hover, .account-menu li a.active {
+                background-color: #026625; /* Màu xanh Resip */
+                color: #fff;
+            }
+
+            .account-menu li a i {
+                margin-right: 15px;
+                width: 20px;
+                text-align: center;
+            }
+
+    /* Nội dung bên phải */
+    .dashboard-content {
+        background: transparent;
+    }
+
+    .welcome-text {
+        font-size: 18px;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr); /* Grid 3 cột chuẩn */
+        gap: 24px;
+        margin-top: 30px;
+    }
+
+    .dashboard-card {
+        background: #fff;
+        border: 1px solid #e1e1e1;
+        border-radius: 8px;
+        padding: 40px 20px;
+        text-align: center;
+        text-decoration: none;
+        color: #555;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    }
+
+        .dashboard-card:hover {
+            border-color: #026625;
+            box-shadow: 0 8px 20px rgba(2, 102, 37, 0.15);
+            transform: translateY(-5px);
+            color: #026625;
+        }
+
+        .dashboard-card i {
+            font-size: 42px;
+            margin-bottom: 15px;
+            color: #026625; /* Icon luôn xanh */
+            transition: transform 0.3s;
+        }
+
+        .dashboard-card:hover i {
+            transform: scale(1.1);
+        }
+
+        .dashboard-card span {
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+    /* Responsive cho mobile */
+    @@media (max-width: 768px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr; /* 1 cột trên mobile */
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <h2 style="font-weight: 800; color: #1a1a1a; margin-bottom: 20px; border-left: 5px solid #026625; padding-left: 15px;">
+                    TÀI KHOẢN CỦA TÔI
+                </h2>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-3 col-md-4 mb-4">
+                <div class="account-sidebar">
+                    <div class="user-profile-header">
+                        <div class="user-avatar">
+                            <span>@(User.Identity.Name?.Substring(0, 1).ToUpper() ?? "U")</span>
+                        </div>
+                        <h5 class="mb-1 fw-bold">@User.Identity.Name</h5>
+                        <small class="text-muted">Thành viên thân thiết</small>
+                    </div>
+                    <ul class="account-menu">
+                        <li><a href="#" class="active"><i class="fa fa-dashboard"></i> Trang tài khoản</a></li>
+                        <li><a asp-controller="DonHang" asp-action="History"><i class="fa fa-shopping-bag"></i> Đơn hàng</a></li>
+                        <li><a href="#"><i class="fa fa-download"></i> Tải xuống</a></li>
+                        <li><a href="#"><i class="fa fa-map-marker"></i> Sổ địa chỉ</a></li>
+                        <li><a href="#"><i class="fa fa-user-circle"></i> Thông tin cá nhân</a></li>
+                        <li>
+                            <a asp-controller="Account" asp-action="Logout" style="color: #dc3545;">
+                                <i class="fa fa-sign-out"></i> Đăng xuất
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-lg-9 col-md-8">
+                <div class="dashboard-content">
+                    <p class="welcome-text">
+                        Xin chào, <strong style="color: #026625;">@User.Identity.Name</strong> 👋
+                    </p>
+                    <p class="text-muted">
+                        Từ bảng điều khiển tài khoản, bạn có thể xem các đơn đặt hàng gần đây, quản lý địa chỉ giao hàng và chỉnh sửa mật khẩu cũng như chi tiết tài khoản của mình.
+                    </p>
+
+                    <div class="dashboard-grid">
+                        <a asp-controller="LichSuDonHang" asp-action="Index" class="dashboard-card">
+                            <i class="fa fa-shopping-bag"></i>
+                            <span>Đơn hàng</span>
+                        </a>
+
+                        <a href="#" class="dashboard-card">
+                            <i class="fa fa-cloud-download"></i>
+                            <span>Tải xuống</span>
+                        </a>
+
+                        <a href="#" class="dashboard-card">
+                            <i class="fa fa-map-marker"></i>
+                            <span>Địa chỉ</span>
+                        </a>
+
+                        <a href="#" class="dashboard-card">
+                            <i class="fa fa-user-circle-o"></i>
+                            <span>Tài khoản</span>
+                        </a>
+
+                        <a href="#" class="dashboard-card">
+                            <i class="fa fa-heart-o"></i>
+                            <span>Yêu thích</span>
+                        </a>
+
+                        <a asp-controller="Account" asp-action="Logout" class="dashboard-card">
+                            <i class="fa fa-sign-out"></i>
+                            <span>Đăng xuất</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

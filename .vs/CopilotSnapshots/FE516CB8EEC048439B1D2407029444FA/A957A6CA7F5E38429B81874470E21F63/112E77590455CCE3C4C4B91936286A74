@@ -1,0 +1,14 @@
+﻿{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=WIN-2MOU2DROTQR\\SQLEXPRESS;Database=ResipWebDb;Trusted_Connection=True;TrustServerCertificate=True;"
+  },
+
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+
+  "AllowedHosts": "*"
+}

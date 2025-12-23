@@ -1,0 +1,31 @@
+﻿@model ResipWeb.Models.ForgotPasswordViewModel
+
+@{
+    ViewData["Title"] = "??t l?i m?t kh?u";
+}
+
+<div class="container" style="min-height:60vh;display:flex;align-items:center;justify-content:center;padding:40px 0;">
+    <div style="width:100%;max-width:500px;">
+        <h3 class="text-center">??t l?i m?t kh?u</h3>
+        <form asp-action="ResetPassword" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Username" />
+            <input type="hidden" asp-for="Token" />
+
+            <div class="mb-3">
+                <input asp-for="NewPassword" class="form-control" placeholder="M?t kh?u m?i" />
+                <span asp-validation-for="NewPassword" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <input asp-for="ConfirmPassword" class="form-control" placeholder="Nh?p l?i m?t kh?u m?i" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+
+            <button class="btn btn-success" type="submit">??t l?i m?t kh?u</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

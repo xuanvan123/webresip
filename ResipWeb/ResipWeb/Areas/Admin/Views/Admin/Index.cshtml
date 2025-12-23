@@ -1,0 +1,278 @@
+﻿@{
+    ViewData["Title"] = "Bảng điều khiển";
+}
+
+<section class="content-header">
+    <h1 style="margin-left:15px;">
+        <i class="fa fa-dashboard" style="padding-right:10px"></i>
+        Bảng điều khiển
+    </h1>
+</section>
+
+<style>
+    /*
+                 * THÊM CSS ĐỂ KHẮC PHỤC LỖI KHOẢNG CÁCH
+                 */
+    .content-header {
+        /* Tạo khoảng cách đồng nhất bên trái và phải cho tiêu đề */
+        padding: 15px 15px 0 25px;
+    }
+
+    .content {
+        /* Quan trọng nhất: Thêm padding bên trái cho nội dung chính */
+        padding-left: 25px;
+        padding-right: 25px;
+    }
+
+    /* CÁC STYLE KHÁC CỦA BẠN (GIỮ NGUYÊN) */
+    .common-bg {
+        background-color: #026625 !important;
+        color: #fff !important;
+        border-radius: 10px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+        .common-bg:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(161, 58, 58, 0.3);
+        }
+
+    .small-box h3 {
+        font-size: 32px;
+        font-weight: bold;
+    }
+
+    .info-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+
+        .info-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            transform: translateY(-3px);
+        }
+
+        .info-card h4 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .info-card h2 {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 0;
+            color: #333;
+        }
+
+    .progress-item {
+        margin-bottom: 20px;
+    }
+
+        .progress-item strong {
+            font-size: 15px;
+            color: #333;
+        }
+
+    .progress {
+        height: 30px;
+        border-radius: 5px;
+        margin-top: 8px;
+        background-color: #f5f5f5;
+    }
+
+    .progress-bar {
+        font-size: 14px;
+        line-height: 30px;
+        font-weight: 600;
+        border-radius: 5px;
+    }
+
+    .stats-icon {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 8px;
+    }
+
+    .icon-aqua {
+        background-color: #00c0ef;
+    }
+
+    .icon-green {
+        background-color: #00a65a;
+    }
+
+    .icon-red {
+        background-color: #dd4b39;
+    }
+</style>
+
+<section class="content">
+    <div class="row">
+        <div class="col-lg-3 col-xs-6">
+            <div class="small-box common-bg">
+                <div class="inner">
+                    <h3>@ViewBag.ProductCount</h3>
+                    <p>Tổng sản phẩm</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-xs-6">
+            <div class="small-box common-bg">
+                <div class="inner">
+                    <h3>@ViewBag.CategoryCount</h3>
+                    <p>Danh mục sản phẩm</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-xs-6">
+            <div class="small-box common-bg">
+                <div class="inner">
+                    <h3>@ViewBag.PendingOrders</h3>
+                    <p>Đơn hàng chờ xử lý</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-xs-6">
+            <div class="small-box common-bg">
+                <div class="inner">
+                    <h3>@ViewBag.TotalCustomers</h3>
+                    <p>Khách hàng</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-3 col-xs-6">
+            <div class="info-card">
+                <h4>Sản phẩm hoạt động</h4>
+                <h2>@ViewBag.ActiveProducts</h2>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-xs-6">
+            <div class="info-card">
+                <h4>Sản phẩm tạm ẩn</h4>
+                <h2>@ViewBag.InactiveProducts</h2>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-xs-6">
+            <div class="info-card">
+                <h4>Đơn hoàn thành</h4>
+                <h2>@ViewBag.CompletedOrders</h2>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-xs-6">
+            <div class="info-card">
+                <h4>Doanh thu</h4>
+                <h2>@(ViewBag.TotalRevenue ?? 0):N0 đ</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div style="background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <h3 style="margin-top: 0; font-size: 18px; font-weight: 600;">Top danh mục có nhiều sản phẩm</h3>
+
+                @if (ViewBag.TopCategories != null && ViewBag.TopCategories.Count > 0)
+                {
+                    foreach (var item in ViewBag.TopCategories)
+                    {
+                        var percentage = ViewBag.ProductCount > 0 ? (item.ProductCount * 100.0 / ViewBag.ProductCount) : 0;
+                        <div class="progress-item">
+                            <div>
+                                <strong>@item.CategoryName</strong>
+                                <span style="float: right; color: #999;">@item.ProductCount sản phẩm</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar" style="width: @percentage%; background-color: #00c0ef;">
+                                    @String.Format("{0:0.1}%", percentage)
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p style="text-align: center; color: #999; padding: 30px 0;">Chưa có dữ liệu</p>
+                }
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div style="background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <h3 style="margin-top: 0; font-size: 18px; font-weight: 600;">Thống kê tổng quan</h3>
+
+                <div style="padding: 10px 0; border-bottom: 1px solid #f0f0f0;">
+                    <span class="stats-icon icon-aqua"></span>
+                    Tổng <strong>@ViewBag.ProductCount</strong> sản phẩm trong hệ thống
+                </div>
+
+                <div style="padding: 10px 0; border-bottom: 1px solid #f0f0f0;">
+                    <span class="stats-icon icon-green"></span>
+                    <strong>@ViewBag.ActiveProducts</strong> sản phẩm đang hiển thị
+                </div>
+
+                <div style="padding: 10px 0; border-bottom: 1px solid #f0f0f0;">
+                    <span class="stats-icon icon-red"></span>
+                    <strong>@ViewBag.InactiveProducts</strong> sản phẩm đang ẩn
+                </div>
+
+                <div style="padding: 10px 0; border-bottom: 1px solid #f0f0f0;">
+                    <span class="stats-icon icon-green"></span>
+                    <strong>@ViewBag.CategoryCount</strong> danh mục đang hoạt động
+                </div>
+
+                <div style="padding: 10px 0;">
+                    <span class="stats-icon icon-aqua"></span>
+                    <strong>@ViewBag.ActiveCategories</strong> danh mục kích hoạt
+                </div>
+
+                <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #f0f0f0;">
+                    <a href="/Admin/SanPham" class="btn btn-success">
+                        <i class="fa fa-eye"></i> Xem tất cả sản phẩm
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" style="margin-top: 20px;">
+        <div class="col-md-12">
+            <div style="background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+                <h3 style="margin-top: 0; margin-bottom: 25px; font-size: 18px; font-weight: 600;">Hành động nhanh</h3>
+
+                <a href="/Admin/SanPham/Create" class="btn btn-success btn-lg" style="margin: 5px;">
+                    <i class="fa fa-plus-circle"></i> Thêm sản phẩm mới
+                </a>
+
+                <a href="/Admin/Category/Create" class="btn btn-primary btn-lg" style="margin: 5px;">
+                    <i class="fa fa-list"></i> Thêm danh mục
+                </a>
+
+                <a href="/Admin/Orders" class="btn btn-warning btn-lg" style="margin: 5px;">
+                    <i class="fa fa-shopping-cart"></i> Quản lý đơn hàng
+                </a>
+
+                <a href="/Admin/Customers" class="btn btn-info btn-lg" style="margin: 5px;">
+                    <i class="fa fa-users"></i> Quản lý khách hàng
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

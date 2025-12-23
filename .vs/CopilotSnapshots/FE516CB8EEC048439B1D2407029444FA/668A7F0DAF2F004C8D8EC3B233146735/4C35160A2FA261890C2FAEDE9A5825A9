@@ -1,0 +1,97 @@
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using ResipWeb.Areas.Admin.Models;
+using System.Security.Claims;
+
+namespace ResipWeb.Areas.Admin.Controllers
+{
+    [Area("Admin")]
+    public class AccountController : Controller
+    {
+        // =======================
+        // GET: /Admin/Account/Login
+        // =======================
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult Login(string? returnUrl = null)
+        {
+            // Nếu đã login rồi thì không cho vào login nữa
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Index", "Admin", new { area = "Admin" });
+            }
+
+            ViewBag.ReturnUrl = returnUrl;
+            return View();
+        }
+
+        // =======================
+        // POST: /Admin/Account/Login
+        // =======================
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            // ===== LOGIN CỨNG (demo) =====
+            if (model.Username == "admin" && model.Password == "123456")
+            {
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, model.Username),
+                    new Claim(ClaimTypes.Role, "Admin")
+                };
+
+                var identity = new ClaimsIdentity(
+                    claims,
+                    CookieAuthenticationDefaults.AuthenticationScheme
+                );
+
+                var principal = new ClaimsPrincipal(identity);
+
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    principal,
+                    new AuthenticationProperties
+                    {
+                        IsPersistent = model.RememberMe
+                    }
+                );
+
+                // Nếu có ReturnUrl thì quay lại đúng trang bị chặn
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
+
+                // Mặc định vào Dashboard
+                return RedirectToAction("Index", "Admin", new { area = "Admin" });
+            }
+
+            ModelState.AddModelError(string.Empty, "Tên đăng nhập hoặc mật khẩu không đúng");
+            return View(model);
+        }
+
+        // =======================
+        // POST: /Admin/Account/Logout
+        // =======================
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme
+            );
+
+            return RedirectToAction("Login", "Account", new { area = "Admin" });
+        }
+    }
+}
