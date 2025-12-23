@@ -1,0 +1,14 @@
+Link web
+
+
+Tài khoản admin:  .../Admin/Account/Login
+user: admin
+password: 123456
+
+Tài khoản khách hàng ..../Account/Login
+user: van | password: 123456
+user: thuyngan05 | password: 123456
+user: van312313 | password: 123456
+user: MAIKHANH | password: 123456
+user: van123 | password: 123456
+user: xuanvan | password: 123456
